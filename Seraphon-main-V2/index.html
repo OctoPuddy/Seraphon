@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 
 <html lang="fr">
@@ -28,7 +29,7 @@ if (sessionStorage.getItem('returnToRest')) {
       max-width: 1200px;
       margin: 0 auto;
       min-height: 100vh;
-  height: auto;
+      height: auto;
     }
     header {
       height: 60px;
@@ -59,6 +60,11 @@ if (sessionStorage.getItem('returnToRest')) {
     }
     .drag-toggle.active {
       background-color: #88c;
+      color: white;
+    }
+    /* Style pour le bouton Composition actif */
+    .composition-toggle.active {
+      background-color: #8c8;
       color: white;
     }
     .dropdown-panel {
@@ -168,13 +174,21 @@ if (sessionStorage.getItem('returnToRest')) {
       height: auto;
       cursor: pointer;
     }
+    /* Classes pour le mode composition */
+    .inactive-card {
+      opacity: 0.3;
+      filter: grayscale(100%);
+    }
+    .hidden-card {
+      display: none !important;
+    }
   </style>
 </head>
 <body>
 <header>
 <div class="header-left">
 <div style="position: relative;">
-<button onclick="toggleDropdown('filterDropdown')">Composition</button>
+<button id="compositionToggle" class="composition-toggle">Composition</button>
 <div class="dropdown-panel" id="filterDropdown"></div>
 </div>
 <div style="position: relative;">
@@ -212,256 +226,23 @@ if (sessionStorage.getItem('returnToRest')) {
 <div id="popup-overlay">
 <div class="popup-content" style="background: #222; padding: 20px; display: flex; flex-direction: column; gap: 20px; border-radius: 0.5em;"><div id="popup-t1t3" style="display:none; grid-template-columns: repeat(2, 1fr); gap: 20px;"><img onclick="selectTrait('1')" src="icons/battle-trait-1.png"/><img onclick="selectTrait('2')" src="icons/battle-trait-2.png"/><img onclick="selectTrait('3')" src="icons/battle-trait-3.png"/><img onclick="selectTrait('4')" src="icons/battle-trait-4.png"/></div><div id="popup-battle" style="display:none; grid-template-columns: repeat(2, 1fr); gap: 20px;"><img onclick="selectGeneric('battle', 'eternalstar')" src="icons/eternalstar.png"/><img onclick="selectGeneric('battle', 'shadowstrike')" src="icons/shadowstrike.png"/><img onclick="selectGeneric('battle', 'sunclaw')" src="icons/sunclaw.png"/><img onclick="selectGeneric('battle', 'thunderquake')" src="icons/thunderquake.png"/></div><div id="popup-artefact" style="display:none; grid-template-columns: repeat(2, 1fr); gap: 20px;"><img onclick="selectGeneric('artefact', 'artefact1')" src="icons/artefact1.png"/><img onclick="selectGeneric('artefact', 'artefact2')" src="icons/artefact2.png"/><img onclick="selectGeneric('artefact', 'artefact3')" src="icons/artefact3.png"/></div><div id="popup-trait" style="display:none; grid-template-columns: repeat(2, 1fr); gap: 20px;"><img onclick="selectGeneric('trait', 'beastmaster')" src="icons/beastmaster.png"/><img onclick="selectGeneric('trait', 'beingofthestars')" src="icons/beingofthestars.png"/><img onclick="selectGeneric('trait', 'reptiliancunning')" src="icons/reptiliancunning.png"/></div></div>
 </div>
-<script>let currentTraitTarget = null;
-  let sortableInstance = null;
+<script>
+let currentTraitTarget = null;
+let sortableInstance = null;
+let compositionMode = false;
 
-  window.addEventListener("beforeunload", () => {
-    sessionStorage.setItem("scrollPos", window.scrollY);
-  });
-
-  function openPopup(target) {
-    currentTraitTarget = target;
-    document.getElementById('popup-overlay').style.display = 'flex';
-  }
-
-  function selectTrait(number) {
-    if (currentTraitTarget) {
-      const slot = document.getElementById(`battle-slot-${currentTraitTarget}`);
-      slot.innerHTML = `<img src="icons/battle-trait-${number}.png" alt="Battle Trait" onclick="openPopup('${currentTraitTarget}')" />`;
-      localStorage.setItem(`trait-${currentTraitTarget}`, number);
-      document.getElementById('popup-overlay').style.display = 'none';
-    }
-  }
-
-  function toggleDropdown(id) {
-    document.querySelectorAll('.dropdown-panel').forEach(drop => {
-      drop.style.display = (drop.id === id && drop.style.display !== 'flex') ? 'flex' : 'none';
-    });
-  }
-
-
-
-
-  function updateTopCard(slotId, imgPath) {
-    const slot = document.getElementById(slotId);
-    slot.innerHTML = imgPath ? `<img src="${imgPath}" alt="">` : '';
-  }
-
-  function toggleDrag() {
-    const container = document.getElementById('cardContainer');
-    const button = document.getElementById('dragToggleBtn');
-
-    if (sortableInstance) {
-      sortableInstance.destroy();
-      sortableInstance = null;
-      button.textContent = "Déverrouiller";
-      button.classList.remove("active");
-    } else {
-      sortableInstance = new Sortable(container, {
-        animation: 150,
-        onEnd: saveCardOrder
-      });
-      button.textContent = "Verrouiller";
-      button.classList.add("active");
-    }
-  }
-
-  function saveCardOrder() {
-    const order = Array.from(document.querySelectorAll('#cardContainer .image-button')).map(card => card.dataset.id);
-    localStorage.setItem("cardOrder", JSON.stringify(order));
-  }
-
-  function loadCardOrder() {
-    const order = JSON.parse(localStorage.getItem("cardOrder") || "[]");
-    const map = {};
-    document.querySelectorAll('#cardContainer .image-button').forEach(card => {
-      map[card.dataset.id] = card;
-    });
-    order.forEach(id => {
-      if (map[id]) document.getElementById('cardContainer').appendChild(map[id]);
-    });
-  }
-
-  function initCompositionFilter() {
-    document.querySelectorAll('#filterDropdown input[type="checkbox"]').forEach(input => {
-      const id = input.dataset.id;
-      const card = document.querySelector(`.image-button[data-id="${id}"]`);
-      if (!card) return;
-
-      const visible = localStorage.getItem("visible-" + id);
-      if (visible === "0") {
-        card.style.display = "none";
-        input.checked = false;
-      }
-
-      input.addEventListener("change", () => {
-        const isChecked = input.checked;
-        card.style.display = isChecked ? "block" : "none";
-        localStorage.setItem("visible-" + id, isChecked ? "1" : "0");
-        localStorage.removeItem("cardOrder");
-      });
-    });
-  }
-
-  // ajouter nouvelles unités
-    const unitList = [
-      { id: "Slann", name: "Slann Starmaster", img: "slann.png", page: "slann.html" },
-      { id: "Oldblood", name: "Oldblood on Carnosaur", img: "oldblood-carno.png", page: "oldblood-carno.html" },
-      { id: "Troglodon", name: "Skink Oracle on Troglodon", img: "troglodon.png", page: "troglodon.html" },
-      { id: "Starpriest", name: "Skink Starpriest", img: "starpriest.png", page: "starpriest.html" },
-      { id: "Skinks", name: "Skinks", img: "skinks.png", page: "skinks.html" },
-      { id: "Aggradon", name: "Aggradon Lancers", img: "aggradon-lancers.png", page: "aggradon-lancers.html" },
-      { id: "Chargers", name: "Raptadon Chargers", img: "raptadon-chargers.png", page: "raptadon-chargers.html" },
-      { id: "Hunters", name: "Raptadon Hunters", img: "raptadon-hunters.png", page: "raptadon-hunters.html" },
-      { id: "Saurus", name: "Saurus Warriors", img: "saurus-warriors.png", page: "saurus-warriors.html" },
-      { id: "Saurus Guard", name: "Saurus Guard", img: "saurus-guard.png", page: "saurus-guard.html" },
-      { id: "Kroxigor", name: "Kroxigor", img: "kroxigor.png", page: "kroxigor.html" },
-      { id: "Kroxigor Warspawned", name: "Kroxigor Warspawned", img: "kroxigor-warspawned.png", page: "kroxigor-warspawned.html" },
-      { id: "engineofgods", name: "Engine of the Gods", img: "engineofgods.png", page: "engineofgods.html" },
-      { id: "bastiladon-solar", name: "Bastiladon with Solar Engine", img: "bastiladon-solar.png", page: "bastiladon-solar.html" },
-      { id: "Krondspine", name: "Krondspine", img: "krondspine.png", page: "krondspine.html" },
-      { id: "Realmshaper", name: "Realmshaper", img: "realmshaper.png", page: "realmshaper.html" }
-    ];
-
-    document.addEventListener('DOMContentLoaded', () => {
-  ['battle', 'artefact', 'trait'].forEach(type => {
-    const selected = localStorage.getItem(type + "-selection");
-    if (selected) {
-      const slot = document.getElementById("slot-" + type);
-      if (slot) {
-        slot.innerHTML = `<img src="icons/${selected}.png" alt="${type}" onclick="openPopup('${type}')" />`;
-      }
-    }
-  });
-      const container = document.getElementById("cardContainer");
-      const filterDropdown = document.getElementById("filterDropdown");
-
-      unitList.forEach(unit => {
-        // Crée la vignette
-        const a = document.createElement("a");
-        a.href = unit.page;
-        a.className = "image-button";
-        a.dataset.id = unit.id;
-        a.innerHTML = `<img src="boutons/${unit.img}" alt="${unit.name}">`;
-
-        // Appliquer visibilité selon localStorage
-        const visible = localStorage.getItem("visible-" + unit.id);
-        if (visible === "0") {
-          a.style.display = "none";
-        }
-
-        container.appendChild(a);
-
-        // Crée le checkbox dans Composition
-        const label = document.createElement("label");
-        const checkbox = document.createElement("input");
-        checkbox.type = "checkbox";
-        checkbox.dataset.id = unit.id;
-        checkbox.checked = visible !== "0";
-        label.appendChild(checkbox);
-        label.appendChild(document.createTextNode(" " + unit.name));
-        filterDropdown.appendChild(label);
-
-        // Réagit au clic
-        checkbox.addEventListener("change", () => {
-          a.style.display = checkbox.checked ? "block" : "none";
-          localStorage.setItem("visible-" + unit.id, checkbox.checked ? "1" : "0");
-        });
-      });
-
-
-    // Repositionne le scroll
-    const savedPos = sessionStorage.getItem("scrollPos");
-    if (savedPos) window.scrollTo(0, parseInt(savedPos));
-
-    ['T1', 'T3'].forEach(id => {
-      const saved = localStorage.getItem(`trait-${id}`);
-      if (saved) {
-        const slot = document.getElementById(`battle-slot-${id}`);
-        slot.innerHTML = `<img src="icons/battle-trait-${saved}.png" alt="Battle Trait" onclick="openPopup('${id}')" />`;
-      }
-    });
-
-    const slotMap = {
-      'battle': 'slot-battle',
-      'spell': ['slot-spell-1', 'slot-spell-2', 'slot-spell-3'],
-      'artefact': 'slot-artefact',
-  'trait': 'slot-trait'
-    };
-
-    document.querySelectorAll('.dropdown-panel input[type="radio"]').forEach(input => {
-      const key = input.dataset.key;
-      const img = input.dataset.img;
-      const group = input.name;
-
-      if (localStorage.getItem(key) === "1") {
-        input.checked = true;
-        if (group === 'spell') {
-          slotMap[group].forEach((id, i) => updateTopCard(id, img.replace('.png', `${i + 1}.png`)));
-        } else {
-          updateTopCard(slotMap[group], img);
-        }
-      }
-
-      input.addEventListener("change", () => {
-        document.querySelectorAll(`input[name="${group}"]`).forEach(i => {
-          localStorage.setItem(i.dataset.key, "0");
-        });
-        localStorage.setItem(key, "1");
-
-        if (group === 'spell') {
-          slotMap[group].forEach(id => updateTopCard(id, null));
-          slotMap[group].forEach((id, i) => {
-            updateTopCard(id, img.replace('.png', `${i + 1}.png`));
-          });
-        } else {
-          updateTopCard(slotMap[group], img);
-        }
-      });
-    });
-
-    ['battle', 'spell', 'artefact', 'trait'].forEach(group => {
-      const inputs = document.querySelectorAll(`input[name="${group}"]`);
-      const anyChecked = Array.from(inputs).some(input => input.checked);
-      if (!anyChecked && inputs.length > 0) {
-        inputs[0].checked = true;
-        inputs[0].dispatchEvent(new Event('change'));
-      }
-    });
-
-    initCompositionFilter();
-    loadCardOrder();
-  });
-
-  document.addEventListener('click', (e) => {
-    const isButton = e.target.tagName === 'BUTTON';
-    const inDropdown = e.target.closest('.dropdown-panel');
-    if (!isButton && !inDropdown) {
-      document.querySelectorAll('.dropdown-panel').forEach(drop => drop.style.display = 'none');
-    }
-    if (e.target.id === 'popup-overlay') {
-      e.target.style.display = 'none';
-    }
-  });
-
-if (sessionStorage.getItem('returnToRest')) {
-  const target = document.querySelector('.section-rest .image-button');
-  if (target) {
-    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    sessionStorage.removeItem('returnToRest');
-  }
-}
-
-
+window.addEventListener("beforeunload", () => {
+  sessionStorage.setItem("scrollPos", window.scrollY);
+});
 
 function openPopup(target) {
+  currentTraitTarget = target;
   document.getElementById('popup-overlay').style.display = 'flex';
   ['popup-t1t3', 'popup-battle', 'popup-artefact', 'popup-trait'].forEach(id => {
     document.getElementById(id).style.display = 'none';
   });
   if (target === 'T1' || target === 'T3') {
     document.getElementById('popup-t1t3').style.display = 'grid';
-    currentTraitTarget = target;
   } else {
     document.getElementById('popup-' + target).style.display = 'grid';
   }
@@ -473,6 +254,87 @@ function selectTrait(number) {
     slot.innerHTML = `<img src="icons/battle-trait-${number}.png" alt="Battle Trait" onclick="openPopup('${currentTraitTarget}')" />`;
     localStorage.setItem(`trait-${currentTraitTarget}`, number);
     document.getElementById('popup-overlay').style.display = 'none';
+  }
+}
+
+function toggleDropdown(id) {
+  document.querySelectorAll('.dropdown-panel').forEach(drop => {
+    drop.style.display = (drop.id === id && drop.style.display !== 'flex') ? 'flex' : 'none';
+  });
+}
+
+function updateTopCard(slotId, imgPath) {
+  const slot = document.getElementById(slotId);
+  slot.innerHTML = imgPath ? `<img src="${imgPath}" alt="">` : '';
+}
+
+function toggleDrag() {
+  if (compositionMode) return; // Ne pas activer le drag en mode composition
+  
+  const container = document.getElementById('cardContainer');
+  const button = document.getElementById('dragToggleBtn');
+
+  if (sortableInstance) {
+    sortableInstance.destroy();
+    sortableInstance = null;
+    button.textContent = "Déverrouiller";
+    button.classList.remove("active");
+  } else {
+    sortableInstance = new Sortable(container, {
+      animation: 150,
+      onEnd: saveCardOrder
+    });
+    button.textContent = "Verrouiller";
+    button.classList.add("active");
+  }
+}
+
+function saveCardOrder() {
+  const order = Array.from(document.querySelectorAll('#cardContainer .image-button:not(.hidden-card)')).map(card => card.dataset.id);
+  localStorage.setItem("cardOrder", JSON.stringify(order));
+}
+
+function loadCardOrder() {
+  const order = JSON.parse(localStorage.getItem("cardOrder") || "[]");
+  const map = {};
+  document.querySelectorAll('#cardContainer .image-button').forEach(card => {
+    map[card.dataset.id] = card;
+  });
+  order.forEach(id => {
+    if (map[id]) document.getElementById('cardContainer').appendChild(map[id]);
+  });
+}
+
+function toggleCompositionMode() {
+  compositionMode = !compositionMode;
+  const button = document.getElementById('compositionToggle');
+  
+  // Si mode composition activé, désactiver Sortable
+  if (compositionMode) {
+    button.classList.add("active");
+    if (sortableInstance) {
+      sortableInstance.destroy();
+      sortableInstance = null;
+      document.getElementById('dragToggleBtn').textContent = "Déverrouiller";
+      document.getElementById('dragToggleBtn').classList.remove("active");
+    }
+    
+    // Afficher toutes les cartes et appliquer inactive-card à celles masquées
+    document.querySelectorAll('.image-button').forEach(card => {
+      const id = card.dataset.id;
+      const visible = localStorage.getItem("visible-" + id);
+      card.classList.remove("hidden-card");
+      card.classList.toggle("inactive-card", visible === "0");
+    });
+  } else {
+    button.classList.remove("active");
+    // Masquer les cartes désactivées
+    document.querySelectorAll('.image-button').forEach(card => {
+      const id = card.dataset.id;
+      const visible = localStorage.getItem("visible-" + id);
+      card.classList.remove("inactive-card");
+      if (visible === "0") card.classList.add("hidden-card");
+    });
   }
 }
 
@@ -490,14 +352,13 @@ function selectGeneric(type, imageKey) {
   }
 }
 
-
 function resetAllData() {
   const keysToRemove = [];
 
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
 
-    // Ne pas toucher aux sélections de battle, artefact, trait (4,5,6)
+    // Ne pas toucher aux sélections de battle, artefact, trait
     const isProtected =
       key === "battle-selection" ||
       key === "artefact-selection" ||
@@ -526,6 +387,183 @@ function resetAllData() {
 
   keysToRemove.forEach(key => localStorage.removeItem(key));
   location.reload();
+}
+
+// Définition de la liste des unités
+const unitList = [
+  { id: "Slann", name: "Slann Starmaster", img: "slann.png", page: "slann.html" },
+  { id: "Oldblood", name: "Oldblood on Carnosaur", img: "oldblood-carno.png", page: "oldblood-carno.html" },
+  { id: "Troglodon", name: "Skink Oracle on Troglodon", img: "troglodon.png", page: "troglodon.html" },
+  { id: "Starpriest", name: "Skink Starpriest", img: "starpriest.png", page: "starpriest.html" },
+  { id: "Skinks", name: "Skinks", img: "skinks.png", page: "skinks.html" },
+  { id: "Aggradon", name: "Aggradon Lancers", img: "aggradon-lancers.png", page: "aggradon-lancers.html" },
+  { id: "Chargers", name: "Raptadon Chargers", img: "raptadon-chargers.png", page: "raptadon-chargers.html" },
+  { id: "Hunters", name: "Raptadon Hunters", img: "raptadon-hunters.png", page: "raptadon-hunters.html" },
+  { id: "Saurus", name: "Saurus Warriors", img: "saurus-warriors.png", page: "saurus-warriors.html" },
+  { id: "Saurus Guard", name: "Saurus Guard", img: "saurus-guard.png", page: "saurus-guard.html" },
+  { id: "Kroxigor", name: "Kroxigor", img: "kroxigor.png", page: "kroxigor.html" },
+  { id: "Kroxigor Warspawned", name: "Kroxigor Warspawned", img: "kroxigor-warspawned.png", page: "kroxigor-warspawned.html" },
+  { id: "engineofgods", name: "Engine of the Gods", img: "engineofgods.png", page: "engineofgods.html" },
+  { id: "bastiladon-solar", name: "Bastiladon with Solar Engine", img: "bastiladon-solar.png", page: "bastiladon-solar.html" },
+  { id: "Krondspine", name: "Krondspine", img: "krondspine.png", page: "krondspine.html" },
+  { id: "Realmshaper", name: "Realmshaper", img: "realmshaper.png", page: "realmshaper.html" }
+];
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Initialisation du bouton Composition
+  const compBtn = document.getElementById("compositionToggle");
+  if (compBtn) {
+    compBtn.addEventListener("click", toggleCompositionMode);
+  }
+
+  // Restauration des sélections pour battle, artefact, trait
+  ['battle', 'artefact', 'trait'].forEach(type => {
+    const selected = localStorage.getItem(type + "-selection");
+    if (selected) {
+      const slot = document.getElementById("slot-" + type);
+      if (slot) {
+        slot.innerHTML = `<img src="icons/${selected}.png" alt="${type}" onclick="openPopup('${type}')" />`;
+      }
+    }
+  });
+  
+  // Création du conteneur de cartes
+  const container = document.getElementById("cardContainer");
+  
+  // Créer les cartes unités
+  unitList.forEach(unit => {
+    // Crée la vignette
+    const a = document.createElement("a");
+    a.href = unit.page;
+    a.className = "image-button";
+    a.dataset.id = unit.id;
+    a.innerHTML = `<img src="boutons/${unit.img}" alt="${unit.name}">`;
+    
+    // Vérifier et initialiser la visibilité
+    const visible = localStorage.getItem("visible-" + unit.id);
+    if (visible === null) localStorage.setItem("visible-" + unit.id, "1");
+    if (visible === "0") a.classList.add("hidden-card");
+    
+    // Ajouter l'événement de clic pour le mode composition
+    a.addEventListener("click", e => {
+      if (compositionMode) {
+        e.preventDefault();
+        const isInactive = a.classList.toggle("inactive-card");
+        localStorage.setItem("visible-" + unit.id, isInactive ? "0" : "1");
+      }
+    });
+    
+    container.appendChild(a);
+    
+    // Créer également l'entrée dans le filterDropdown pour la compatibilité
+    const label = document.createElement("label");
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.dataset.id = unit.id;
+    checkbox.checked = visible !== "0";
+    label.appendChild(checkbox);
+    label.appendChild(document.createTextNode(" " + unit.name));
+    document.getElementById("filterDropdown").appendChild(label);
+    
+    // Gestionnaire pour les checkboxes du dropdown (maintenu pour compatibilité)
+    checkbox.addEventListener("change", () => {
+      const card = document.querySelector(`.image-button[data-id="${unit.id}"]`);
+      if (!card) return;
+      
+      const isChecked = checkbox.checked;
+      localStorage.setItem("visible-" + unit.id, isChecked ? "1" : "0");
+      
+      if (!compositionMode) {
+        card.style.display = isChecked ? "block" : "none";
+        card.classList.toggle("hidden-card", !isChecked);
+      } else {
+        card.classList.toggle("inactive-card", !isChecked);
+      }
+    });
+  });
+  
+  // Repositionne le scroll
+  const savedPos = sessionStorage.getItem("scrollPos");
+  if (savedPos) window.scrollTo(0, parseInt(savedPos));
+  
+  // Restaure les traits de bataille
+  ['T1', 'T3'].forEach(id => {
+    const saved = localStorage.getItem(`trait-${id}`);
+    if (saved) {
+      const slot = document.getElementById(`battle-slot-${id}`);
+      slot.innerHTML = `<img src="icons/battle-trait-${saved}.png" alt="Battle Trait" onclick="openPopup('${id}')" />`;
+    }
+  });
+  
+  // Configuration des sélections de sorts
+  const slotMap = {
+    'battle': 'slot-battle',
+    'spell': ['slot-spell-1', 'slot-spell-2', 'slot-spell-3'],
+    'artefact': 'slot-artefact',
+    'trait': 'slot-trait'
+  };
+  
+  document.querySelectorAll('.dropdown-panel input[type="radio"]').forEach(input => {
+    const key = input.dataset.key;
+    const img = input.dataset.img;
+    const group = input.name;
+    
+    if (localStorage.getItem(key) === "1") {
+      input.checked = true;
+      if (group === 'spell') {
+        slotMap[group].forEach((id, i) => updateTopCard(id, img.replace('.png', `${i + 1}.png`)));
+      } else {
+        updateTopCard(slotMap[group], img);
+      }
+    }
+    
+    input.addEventListener("change", () => {
+      document.querySelectorAll(`input[name="${group}"]`).forEach(i => {
+        localStorage.setItem(i.dataset.key, "0");
+      });
+      localStorage.setItem(key, "1");
+      
+      if (group === 'spell') {
+        slotMap[group].forEach(id => updateTopCard(id, null));
+        slotMap[group].forEach((id, i) => {
+          updateTopCard(id, img.replace('.png', `${i + 1}.png`));
+        });
+      } else {
+        updateTopCard(slotMap[group], img);
+      }
+    });
+  });
+  
+  ['battle', 'spell', 'artefact', 'trait'].forEach(group => {
+    const inputs = document.querySelectorAll(`input[name="${group}"]`);
+    const anyChecked = Array.from(inputs).some(input => input.checked);
+    if (!anyChecked && inputs.length > 0) {
+      inputs[0].checked = true;
+      inputs[0].dispatchEvent(new Event('change'));
+    }
+  });
+  
+  loadCardOrder();
+});
+
+document.addEventListener('click', (e) => {
+  // Fermer les dropdowns en cliquant ailleurs
+  if (!e.target.closest('.dropdown-panel') && !e.target.matches('button')) {
+    document.querySelectorAll('.dropdown-panel').forEach(drop => drop.style.display = 'none');
+  }
+  
+  // Fermer le popup en cliquant en dehors
+  if (e.target.id === 'popup-overlay') {
+    e.target.style.display = 'none';
+  }
+});
+
+if (sessionStorage.getItem('returnToRest')) {
+  const target = document.querySelector('.section-rest .image-button');
+  if (target) {
+    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    sessionStorage.removeItem('returnToRest');
+  }
 }
 </script>
 </body>
