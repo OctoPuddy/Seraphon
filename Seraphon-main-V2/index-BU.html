@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 
 <html lang="fr">
@@ -6,7 +7,16 @@
 <title>Index AOS</title>
 <meta content="width=device-width, initial-scale=1.0, user-scalable=yes" name="viewport"/>
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@500&amp;display=swap" rel="stylesheet"/>
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js">
+if (sessionStorage.getItem('returnToRest')) {
+  const target = document.querySelector('.section-rest .image-button');
+  if (target) {
+    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    sessionStorage.removeItem('returnToRest');
+  }
+}
+
+</script>
 <style>
     html, body {
       margin: 0;
@@ -127,7 +137,6 @@
       overflow: hidden;
       transition: transform 0.2s ease;
       touch-action: auto;
-      position: relative;
     }
     .image-button:hover {
       transform: scale(1.03);
@@ -139,35 +148,6 @@
       display: block;
       border-radius: 0.6em;
     }
-    
-    /* Style pour le nom des unités en mode composition */
-    .unit-name {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      color: white;
-      background-color: rgba(0, 0, 0, 0.7);
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-size: 2em;
-      font-weight: bold;
-      text-align: center;
-      white-space: normal;
-      word-wrap: break-word;
-      max-width: 90%;
-      line-height: 1.2;
-      opacity: 0;
-      transition: opacity 0.2s ease;
-      pointer-events: none;
-      z-index: 10;
-    }
-    
-    /* Afficher le nom en mode composition */
-    body.composition-mode .unit-name {
-      opacity: 1;
-    }
-    
     #popup-overlay {
       display: none;
       justify-content: center;
@@ -332,7 +312,6 @@ function toggleCompositionMode() {
   // Si mode composition activé, désactiver Sortable
   if (compositionMode) {
     button.classList.add("active");
-    document.body.classList.add("composition-mode");
     if (sortableInstance) {
       sortableInstance.destroy();
       sortableInstance = null;
@@ -349,7 +328,6 @@ function toggleCompositionMode() {
     });
   } else {
     button.classList.remove("active");
-    document.body.classList.remove("composition-mode");
     // Masquer les cartes désactivées
     document.querySelectorAll('.image-button').forEach(card => {
       const id = card.dataset.id;
@@ -460,14 +438,7 @@ document.addEventListener('DOMContentLoaded', () => {
     a.href = unit.page;
     a.className = "image-button";
     a.dataset.id = unit.id;
-    
-    // Créer l'élément pour le nom de l'unité
-    const nameDiv = document.createElement("div");
-    nameDiv.className = "unit-name";
-    nameDiv.textContent = unit.name;
-    
     a.innerHTML = `<img src="boutons/${unit.img}" alt="${unit.name}">`;
-    a.appendChild(nameDiv);
     
     // Vérifier et initialiser la visibilité
     const visible = localStorage.getItem("visible-" + unit.id);
