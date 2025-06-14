@@ -8,7 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@500&amp;display=swap" rel="stylesheet"/>
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 <style>
-   html, body {
+html, body {
      margin: 0;
      padding: 0;
      background-color: #222;
@@ -174,22 +174,45 @@
      opacity: 1;
    }
    
-/* Style pour les badges sur les vignettes */
-.unit-badge {
- position: absolute;
- bottom: 5px;
- right: 5px;
- width: 40%;
- height: 40%;
- max-width: 120px;  /* Limite la taille max pour les grandes vignettes */
- max-height: 120px;
- object-fit: contain;
- z-index: 5;
- pointer-events: none;
+/* Container pour plusieurs badges (section du bas uniquement) */
+.badges-container {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  z-index: 5;
+  pointer-events: none;
 }
 
-/* Style pour les badges sur les vignettes du haut */
-/* Style pour les badges sur les vignettes du haut */
+/* Taille par défaut (1 badge) */
+.unit-badge {
+  width: 40px;
+  height: 40px;
+  max-width: 40px;
+  max-height: 40px;
+  object-fit: contain;
+  transition: all 0.2s ease;
+}
+
+/* 2 badges = plus petits */
+.badges-container:has(.unit-badge:nth-child(2)) .unit-badge {
+  width: 35px;
+  height: 35px;
+  max-width: 35px;
+  max-height: 35px;
+}
+
+/* 3 badges = encore plus petits */
+.badges-container:has(.unit-badge:nth-child(3)) .unit-badge {
+  width: 30px;
+  height: 30px;
+  max-width: 30px;
+  max-height: 30px;
+}
+
+/* Pour les vignettes du haut, badges fixes (pas de gestion multiple) */
 .top-card-slot .unit-badge {
   position: absolute;
   bottom: 5px;
@@ -251,6 +274,7 @@
      width: 180px !important;
      height: 180px !important;
    }
+
  </style>
 </head>
 <body>
