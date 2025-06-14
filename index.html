@@ -377,7 +377,7 @@ html, body {
 </div>
 </div>
 <script>
-let currentTraitTarget = null;
+  let currentTraitTarget = null;
 let sortableInstance = null;
 let compositionMode = false;
 let badgeMode = false;
@@ -476,21 +476,78 @@ function selectMonstruous(number) {
 }
 
 function selectBadge(number) {
- if (currentBadgeTarget) {
-   const existingBadge = currentBadgeTarget.querySelector('.unit-badge');
-   if (existingBadge) {
-     existingBadge.remove();
-   }
-   
-   const badge = document.createElement('img');
-   badge.className = 'unit-badge';
-   badge.src = `icons/badge${number}.png`;
-   currentBadgeTarget.appendChild(badge);
-   
-   // Sauvegarder le badge choisi
-   localStorage.setItem(`badge-${currentBadgeTarget.dataset.id}`, number);
- }
- document.getElementById('popup-overlay').style.display = 'none';
+  if (currentBadgeTarget) {
+    // Récupérer ou créer le container de badges
+    let badgesContainer = currentBadgeTarget.querySelector('.badges-container');
+    if (!badgesContainer) {
+      badgesContainer = document.createElement('div');
+      badgesContainer.className = 'badges-container';
+      currentBadgeTarget.appendChild(badgesContainer);
+    }
+    
+    // Vérifier si ce badge existe déjà
+    const existingBadge = badgesContainer.querySelector(`img[src="icons/badge${number}.png"]`);
+    if (existingBadge) {
+      // Si le badge existe, le retirer
+      existingBadge.remove();
+    } else {
+      // Si on a déjà 3 badges, retirer le premier
+      const badges = badgesContainer.querySelectorAll('.unit-badge');
+      if (badges.length >= 3) {
+        badges[0].remove();
+      }
+      
+      // Ajouter le nouveau badge
+      const badge = document.createElement('img');
+      badge.className = 'unit-badge';
+      badge.src = `icons/badge${number}.png`;
+      badgesContainer.appendChild(badge);
+    }
+    
+    // Nettoyer si le container est vide
+    if (badgesContainer.children.length === 0) {
+      badgesContainer.remove();
+    }
+    
+    // Sauvegarder les badges
+    saveBadges(currentBadgeTarget);
+  }
+  document.getElementById('popup-overlay').style.display = 'none';
+}
+
+function saveBadges(target) {
+  const badgesContainer = target.querySelector('.badges-container');
+  const badges = [];
+  if (badgesContainer) {
+    badgesContainer.querySelectorAll('.unit-badge').forEach(badge => {
+      const src = badge.src;
+      const number = src.match(/badge(\d+)\.png/)?.[1];
+      if (number) badges.push(number);
+    });
+  }
+  localStorage.setItem(`badges-${target.dataset.id}`, JSON.stringify(badges));
+}
+
+function loadBadges(target) {
+  const savedBadges = localStorage.getItem(`badges-${target.dataset.id}`);
+  if (savedBadges) {
+    const badges = JSON.parse(savedBadges);
+    if (badges.length > 0) {
+      let badgesContainer = target.querySelector('.badges-container');
+      if (!badgesContainer) {
+        badgesContainer = document.createElement('div');
+        badgesContainer.className = 'badges-container';
+        target.appendChild(badgesContainer);
+      }
+      
+      badges.forEach(badgeNumber => {
+        const badge = document.createElement('img');
+        badge.className = 'unit-badge';
+        badge.src = `icons/badge${badgeNumber}.png`;
+        badgesContainer.appendChild(badge);
+      });
+    }
+  }
 }
 
 function toggleDropdown(id) {
@@ -649,7 +706,8 @@ function resetAllData() {
      (key.startsWith("trait-T1") ||
       key.startsWith("trait-T3") ||
       key.startsWith("buttonsState-") ||
-      key.startsWith("notesText-")) &&
+      key.startsWith("notesText-") ||
+      key.startsWith("badges-")) &&
       !isProtected
    ) {
      keysToRemove.push(key);
@@ -827,15 +885,9 @@ if (!traitSelection) {
  
  // Restaurer les badges sauvegardés
  unitList.forEach(unit => {
-   const badgeNumber = localStorage.getItem(`badge-${unit.id}`);
-   if (badgeNumber) {
-     const card = document.querySelector(`.image-button[data-id="${unit.id}"]`);
-     if (card) {
-       const badge = document.createElement('img');
-       badge.className = 'unit-badge';
-       badge.src = `icons/badge${badgeNumber}.png`;
-       card.appendChild(badge);
-     }
+   const card = document.querySelector(`.image-button[data-id="${unit.id}"]`);
+   if (card) {
+     loadBadges(card);
    }
  });
  
@@ -892,13 +944,8 @@ document.addEventListener('click', (e) => {
  
  // Fermer le popup en cliquant en dehors
  if (e.target.id === 'popup-overlay') {
-   // Retirer le badge si on clique hors du popup en mode badge
+   // En mode badge, juste fermer sans supprimer les badges
    if (currentBadgeTarget) {
-     const existingBadge = currentBadgeTarget.querySelector('.unit-badge');
-     if (existingBadge) {
-       existingBadge.remove();
-       localStorage.removeItem(`badge-${currentBadgeTarget.dataset.id}`);
-     }
      currentBadgeTarget = null;
    }
    e.target.style.display = 'none';
