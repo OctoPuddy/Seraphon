@@ -188,28 +188,28 @@ html, body {
 
 /* Taille par défaut (1 badge) */
 .unit-badge {
-  width: 40px;
-  height: 40px;
-  max-width: 40px;
-  max-height: 40px;
+  width: 120px;
+  height: 120px;
+  max-width: 120px;
+  max-height: 120px;
   object-fit: contain;
   transition: all 0.2s ease;
 }
 
 /* 2 badges = plus petits */
 .badges-container:has(.unit-badge:nth-child(2)) .unit-badge {
-  width: 35px;
-  height: 35px;
-  max-width: 35px;
-  max-height: 35px;
+  width: 90px;
+  height: 90px;
+  max-width: 90px;
+  max-height: 90px;
 }
 
 /* 3 badges = encore plus petits */
 .badges-container:has(.unit-badge:nth-child(3)) .unit-badge {
-  width: 30px;
-  height: 30px;
-  max-width: 30px;
-  max-height: 30px;
+  width: 60px;
+  height: 60px;
+  max-width: 60px;
+  max-height: 60px;
 }
 
 /* Pour les vignettes du haut, badges fixes (pas de gestion multiple) */
@@ -702,14 +702,13 @@ function resetAllData() {
      key === "trait-beingofthestars" ||
      key === "trait-reptiliancunning";
 
-   if (
-     (key.startsWith("trait-T1") ||
-      key.startsWith("trait-T3") ||
-      key.startsWith("buttonsState-") ||
-      key.startsWith("notesText-") ||
-      key.startsWith("badges-")) &&
-      !isProtected
-   ) {
+if (
+  (key.startsWith("trait-T1") ||
+   key.startsWith("trait-T3") ||
+   key.startsWith("buttonsState-") ||
+   key.startsWith("notesText-")) &&
+   !isProtected
+) {
      keysToRemove.push(key);
    }
  }
