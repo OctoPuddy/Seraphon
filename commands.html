@@ -86,22 +86,165 @@
       border-radius: 6px;
       box-shadow: 0 0 4px rgba(0, 0, 0, 0.4);
     }
+
+    .checkbox-container {
+      position: absolute;
+      right: 20px;
+      top: 20px;
+      z-index: 20;
+      display: flex;
+      gap: 25px;
+      align-items: center;
+    }
+
+    .custom-checkbox {
+      width: 80px;
+      height: 80px;
+      border: 6px solid #333;
+      border-radius: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+      font-weight: bold;
+      background-color: white;
+      transition: all 0.2s ease;
+    }
+
+    .custom-checkbox.red-target {
+      border-color: #ffa500;
+      position: relative;
+    }
+
+    .custom-checkbox.red-target.checked {
+      background-color: #ffa500;
+      color: white;
+    }
+
+    .target-icon {
+      position: relative;
+      width: 74px;
+      height: 74px;
+      border-radius: 50%;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .target-icon::before {
+      content: '';
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      border: 2px solid currentColor;
+      position: absolute;
+    }
+
+    .target-icon::after {
+      content: '';
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background-color: currentColor;
+      position: absolute;
+    }
+
+    .custom-checkbox.green-check {
+      border-color: #00aa00;
+    }
+
+    .custom-checkbox.green-check.state-0 {
+      background-color: white;
+      color: #00aa00;
+    }
+
+    .custom-checkbox.green-check.state-1 {
+      background-color: #00aa00;
+      color: white;
+    }
+
+    .custom-checkbox.green-check.state-2 {
+      background-color: #00aa00;
+      color: white;
+    }
+
+    .custom-checkbox.green-check.state-3 {
+      background-color: #00aa00;
+      color: white;
+    }
   </style>
 </head>
 <body>
   <!-- Bouton accueil -->
   <a href="index.html" class="home-btn">
-    <img src="boutons/house.png" alt="Accueil" />
+    <img src="icons/house.png" alt="Accueil" />
   </a>
 
   <div class="container" id="drawContainer">
     <img src="icons/commands.png" alt="Command Orders" class="full-image" />
-    <img src="season/tactic1.png" alt="Tactic 1" class="full-image" />
-    <img src="season/tactic2.png" alt="Tactic 2" class="full-image" />
-    <img src="season/tactic3.png" alt="Tactic 3" class="full-image" />
-    <img src="season/tactic4.png" alt="Tactic 4" class="full-image" />
-    <img src="season/tactic5.png" alt="Tactic 5" class="full-image" />
-    <img src="season/tactic6.png" alt="Tactic 6" class="full-image" />
+    
+    <div style="position: relative;">
+      <img src="season/tactic1.png" alt="Tactic 1" class="full-image" />
+      <div class="checkbox-container">
+        <div class="custom-checkbox red-target" onclick="toggleCustomCheckbox(this, 1, 'target')">
+          <img src="icons/target.png" alt="Target" class="target-icon" />
+        </div>
+        <div class="custom-checkbox green-check state-0" onclick="cycleCheckState(this, 1)">✓</div>
+      </div>
+    </div>
+    
+    <div style="position: relative;">
+      <img src="season/tactic2.png" alt="Tactic 2" class="full-image" />
+      <div class="checkbox-container">
+        <div class="custom-checkbox red-target" onclick="toggleCustomCheckbox(this, 2, 'target')">
+          <img src="icons/target.png" alt="Target" class="target-icon" />
+        </div>
+        <div class="custom-checkbox green-check state-0" onclick="cycleCheckState(this, 2)">✓</div>
+      </div>
+    </div>
+    
+    <div style="position: relative;">
+      <img src="season/tactic3.png" alt="Tactic 3" class="full-image" />
+      <div class="checkbox-container">
+        <div class="custom-checkbox red-target" onclick="toggleCustomCheckbox(this, 3, 'target')">
+          <img src="icons/target.png" alt="Target" class="target-icon" />
+        </div>
+        <div class="custom-checkbox green-check state-0" onclick="cycleCheckState(this, 3)">✓</div>
+      </div>
+    </div>
+    
+    <div style="position: relative;">
+      <img src="season/tactic4.png" alt="Tactic 4" class="full-image" />
+      <div class="checkbox-container">
+        <div class="custom-checkbox red-target" onclick="toggleCustomCheckbox(this, 4, 'target')">
+          <img src="icons/target.png" alt="Target" class="target-icon" />
+        </div>
+        <div class="custom-checkbox green-check state-0" onclick="cycleCheckState(this, 4)">✓</div>
+      </div>
+    </div>
+    
+    <div style="position: relative;">
+      <img src="season/tactic5.png" alt="Tactic 5" class="full-image" />
+      <div class="checkbox-container">
+        <div class="custom-checkbox red-target" onclick="toggleCustomCheckbox(this, 5, 'target')">
+          <img src="icons/target.png" alt="Target" class="target-icon" />
+        </div>
+        <div class="custom-checkbox green-check state-0" onclick="cycleCheckState(this, 5)">✓</div>
+      </div>
+    </div>
+    
+    <div style="position: relative;">
+      <img src="season/tactic6.png" alt="Tactic 6" class="full-image" />
+      <div class="checkbox-container">
+        <div class="custom-checkbox red-target" onclick="toggleCustomCheckbox(this, 6, 'target')">
+          <img src="icons/target.png" alt="Target" class="target-icon" />
+        </div>
+        <div class="custom-checkbox green-check state-0" onclick="cycleCheckState(this, 6)">✓</div>
+      </div>
+    </div>
+    
     <img src="season/SR.png" alt="SR 25-26" class="full-image" />
 
     <canvas id="drawCanvas"></canvas>
@@ -109,7 +252,7 @@
 
   <!-- Bouton dessin -->
   <button class="toggle-draw-btn disabled" onclick="toggleDrawingMode()">
-    <img src="boutons/draw.png" alt="Dessin" />
+    <img src="icons/draw.png" alt="Dessin" />
   </button>
 
   <!-- Bouton reset -->
@@ -131,7 +274,10 @@
     }
 
     window.addEventListener("resize", resizeCanvas);
-    window.addEventListener("load", resizeCanvas);
+    window.addEventListener("load", () => {
+      resizeCanvas();
+      loadTacticStates();
+    });
 
     function getPos(e) {
       const rect = canvas.getBoundingClientRect();
@@ -188,24 +334,158 @@
 
     function saveDrawing() {
       try {
-        localStorage.setItem("canvasData", canvas.toDataURL());
+        const canvasData = {};
+        canvasData.drawing = canvas.toDataURL();
+        const savedData = JSON.parse(localStorage.getItem("tacticData") || "{}");
+        savedData.canvasDrawing = canvasData.drawing;
+        localStorage.setItem("tacticData", JSON.stringify(savedData));
       } catch (e) {
-        console.warn("Échec de la sauvegarde", e);
+        console.warn("Échec de la sauvegarde du dessin", e);
       }
     }
 
     function loadDrawing() {
-      const dataURL = localStorage.getItem("canvasData");
-      if (dataURL) {
-        const img = new Image();
-        img.onload = () => ctx.drawImage(img, 0, 0);
-        img.src = dataURL;
+      try {
+        const savedData = JSON.parse(localStorage.getItem("tacticData") || "{}");
+        const dataURL = savedData.canvasDrawing;
+        if (dataURL) {
+          const img = new Image();
+          img.onload = () => ctx.drawImage(img, 0, 0);
+          img.src = dataURL;
+        }
+      } catch (e) {
+        console.warn("Échec du chargement du dessin", e);
+      }
+    }
+
+    function cycleCheckState(element, tacticNumber) {
+      // Obtenir l'état actuel
+      let currentState = 0;
+      if (element.classList.contains('state-1')) currentState = 1;
+      else if (element.classList.contains('state-2')) currentState = 2;
+      else if (element.classList.contains('state-3')) currentState = 3;
+      
+      // Calculer le prochain état (cycle 0 -> 1 -> 2 -> 3 -> 0)
+      const nextState = (currentState + 1) % 4;
+      
+      // Supprimer toutes les classes d'état
+      element.classList.remove('state-0', 'state-1', 'state-2', 'state-3');
+      
+      // Ajouter la nouvelle classe d'état et mettre à jour le contenu
+      element.classList.add(`state-${nextState}`);
+      
+      switch(nextState) {
+        case 0:
+          element.textContent = '✓';
+          break;
+        case 1:
+          element.textContent = '1';
+          break;
+        case 2:
+          element.textContent = '2';
+          break;
+        case 3:
+          element.textContent = '3';
+          break;
+      }
+      
+      
+      // Sauvegarder l'état
+      saveCheckState(tacticNumber, nextState);
+    }
+
+    function toggleCustomCheckbox(element, tacticNumber, type) {
+      const isCurrentlyChecked = element.classList.contains('checked');
+      
+      // Décocher l'autre checkbox du même groupe si elle est cochée
+      const container = element.parentElement;
+      const checkCheckbox = container.querySelector('.green-check');
+      
+      
+      // Toggle la checkbox actuelle
+      if (isCurrentlyChecked) {
+        element.classList.remove('checked');
+      } else {
+        element.classList.add('checked');
+      }
+      
+      // Sauvegarder l'état
+      saveTacticState(tacticNumber, type, !isCurrentlyChecked);
+    }
+
+    function saveCheckState(tacticNumber, state) {
+      try {
+        const savedData = JSON.parse(localStorage.getItem("tacticData") || "{}");
+        if (!savedData.tactics) savedData.tactics = {};
+        savedData.tactics[`tactic${tacticNumber}_check_state`] = state;
+        localStorage.setItem("tacticData", JSON.stringify(savedData));
+      } catch (e) {
+        console.warn("Échec de la sauvegarde de l'état du check", e);
+      }
+    }
+
+    function saveTacticState(tacticNumber, type, isChecked) {
+      try {
+        const savedData = JSON.parse(localStorage.getItem("tacticData") || "{}");
+        if (!savedData.tactics) savedData.tactics = {};
+        savedData.tactics[`tactic${tacticNumber}_${type}`] = isChecked;
+        localStorage.setItem("tacticData", JSON.stringify(savedData));
+      } catch (e) {
+        console.warn("Échec de la sauvegarde de l'état des tactiques", e);
+      }
+    }
+
+    function loadTacticStates() {
+      try {
+        const savedData = JSON.parse(localStorage.getItem("tacticData") || "{}");
+        if (savedData.tactics) {
+          for (let i = 1; i <= 6; i++) {
+            const containers = document.querySelectorAll('.checkbox-container');
+            if (containers[i-1]) {
+              const targetCheckbox = containers[i-1].querySelector('.red-target');
+              const checkCheckbox = containers[i-1].querySelector('.green-check');
+              
+              // Charger l'état de la cible
+              if (savedData.tactics[`tactic${i}_target`]) {
+                targetCheckbox.classList.add('checked');
+              }
+              
+              // Charger l'état du check cyclique
+              const checkState = savedData.tactics[`tactic${i}_check_state`] || 0;
+              checkCheckbox.classList.remove('state-0', 'state-1', 'state-2', 'state-3');
+              checkCheckbox.classList.add(`state-${checkState}`);
+              
+              switch(checkState) {
+                case 0:
+                  checkCheckbox.textContent = '✓';
+                  break;
+                case 1:
+                  checkCheckbox.textContent = '1';
+                  break;
+                case 2:
+                  checkCheckbox.textContent = '2';
+                  break;
+                case 3:
+                  checkCheckbox.textContent = '3';
+                  break;
+              }
+            }
+          }
+        }
+      } catch (e) {
+        console.warn("Échec du chargement de l'état des tactiques", e);
       }
     }
 
     function resetCanvas() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      localStorage.removeItem("canvasData");
+      try {
+        const savedData = JSON.parse(localStorage.getItem("tacticData") || "{}");
+        delete savedData.canvasDrawing;
+        localStorage.setItem("tacticData", JSON.stringify(savedData));
+      } catch (e) {
+        console.warn("Échec de la suppression des données de dessin", e);
+      }
     }
   </script>
 </body>
