@@ -944,8 +944,14 @@ document.addEventListener('click', (e) => {
  
  // Fermer le popup en cliquant en dehors
  if (e.target.id === 'popup-overlay') {
-   // En mode badge, juste fermer sans supprimer les badges
+   // En mode badge, retirer tous les badges de l'unité sélectionnée
    if (currentBadgeTarget) {
+     const badgesContainer = currentBadgeTarget.querySelector('.badges-container');
+     if (badgesContainer) {
+       badgesContainer.remove();
+     }
+     // Supprimer aussi la sauvegarde des badges
+     localStorage.removeItem(`badges-${currentBadgeTarget.dataset.id}`);
      currentBadgeTarget = null;
    }
    e.target.style.display = 'none';
