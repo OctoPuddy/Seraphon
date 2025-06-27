@@ -302,7 +302,8 @@ html, body {
 <div class="dropdown-panel" id="manifestationDropdown">
 <label><input data-group="twilit" data-key="manifestation-twilit" name="manifestation" type="radio"/>Twilit Sorcery</label>
 <label><input data-group="morbid" data-key="manifestation-morbid" name="manifestation" type="radio"/>Morbid Conjuration</label>
-<label><input data-group="krondspine" data-key="manifestation-endless" name="manifestation" type="radio"/>Krondspine Incarnate</label>
+<label><input data-group="energy" data-key="manifestation-energy" name="manifestation" type="radio"/>Primal Energy</label>
+<label><input data-group="krondspine" data-key="manifestation-krondspine" name="manifestation" type="radio"/>Krondspine Incarnate</label>
 <label><input data-group="none" data-key="manifestation-none" name="manifestation" type="radio"/>Sans</label>
 </div>
 </div>
@@ -594,7 +595,7 @@ function updateManifestationCards() {
 function getManifestationUnits() {
   return [
     "Malevolent", "Purple sun", "Soulsnare", "Gravetide", "Krondspine", 
-    "Geminids", "Umbrall Spellportal", "Prismatic Palisade"
+    "Geminids", "Umbrall Spellportal", "Prismatic Palisade", "burning head", "ravenak", "emerald"
   ];
 }
 
@@ -602,6 +603,7 @@ function getManifestationGroup(group) {
   const groups = {
     'twilit': ["Geminids", "Prismatic Palisade", "Umbrall Spellportal"],
     'morbid': ["Malevolent", "Purple sun", "Soulsnare","Gravetide"],
+    'energy': ["burning head", "ravenak", "emerald"],
     'krondspine': ["Krondspine"]
   };
   return groups[group] || [];
@@ -805,7 +807,10 @@ const manifestationUnitList = [
  { id: "Krondspine", name: "Krondspine", img: "krondspine.png", page: "krondspine.html" },
  { id: "Geminids", name: "Geminids", img: "geminids.png", page: "geminids.html" },
  { id: "Umbrall Spellportal", name: "Umbrall Spellportal", img: "umbral-spellportal.png", page: "umbral-spellportal.html" },
- { id: "Prismatic Palisade", name: "Prismatic Palisade", img: "prismatic-palisade.png", page: "prismatic-palisade.html" }
+ { id: "Prismatic Palisade", name: "Prismatic Palisade", img: "prismatic-palisade.png", page: "prismatic-palisade.html" },
+ { id: "burning head", name: "The Burning Head", img: "burning-head.png", page: "burning-head.html" },
+ { id: "ravenak", name: "Ravenak's Gnashing Jaws", img: "ravenak.png", page: "ravenak.html" },
+ { id: "emerald", name: "Emerald Lifeswarm", img: "emerald.png", page: "emerald.html" }
 ];
 
 const unitList = [...normalUnitList, ...manifestationUnitList];
