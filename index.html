@@ -301,8 +301,8 @@ html, body {
 <button onclick="toggleDropdown('manifestationDropdown')">Manifestations</button>
 <div class="dropdown-panel" id="manifestationDropdown">
 <label><input data-group="twilit" data-key="manifestation-twilit" name="manifestation" type="radio"/>Twilit Sorcery</label>
-<label><input data-group="malevolent" data-key="manifestation-malevolent" name="manifestation" type="radio"/>Malevolent Magic</label>
-<label><input data-group="endless" data-key="manifestation-endless" name="manifestation" type="radio"/>Endless Spells</label>
+<label><input data-group="morbid" data-key="manifestation-morbid" name="manifestation" type="radio"/>Morbid Conjuration</label>
+<label><input data-group="krondspine" data-key="manifestation-endless" name="manifestation" type="radio"/>Krondspine Incarnate</label>
 <label><input data-group="none" data-key="manifestation-none" name="manifestation" type="radio"/>Sans</label>
 </div>
 </div>
@@ -594,15 +594,15 @@ function updateManifestationCards() {
 function getManifestationUnits() {
   return [
     "Malevolent", "Purple sun", "Soulsnare", "Gravetide", "Krondspine", 
-    "Geminids", "Umbrall Spellportal", "Prismatic Palisade", "Realmshaper"
+    "Geminids", "Umbrall Spellportal", "Prismatic Palisade"
   ];
 }
 
 function getManifestationGroup(group) {
   const groups = {
     'twilit': ["Geminids", "Prismatic Palisade", "Umbrall Spellportal"],
-    'malevolent': ["Malevolent", "Purple sun", "Soulsnare"],
-    'endless': ["Gravetide", "Krondspine", "Realmshaper"]
+    'morbid': ["Malevolent", "Purple sun", "Soulsnare","Gravetide"],
+    'krondspine': ["Krondspine"]
   };
   return groups[group] || [];
 }
@@ -793,7 +793,8 @@ const normalUnitList = [
  { id: "stegadon-chief", name: "Stegadon Chief", img: "stegadon-chief.png", page: "stegadon-chief.html" },
  { id: "engineofgods", name: "Engine of the Gods", img: "engineofgods.png", page: "engineofgods.html" },
  { id: "terradon", name: "Terradon Riders", img: "terradon.png", page: "terradon.html" },
- { id: "ripperdactyl", name: "Ripperdactyl Riders", img: "ripperdactyl.png", page: "ripperdactyl.html" }
+ { id: "ripperdactyl", name: "Ripperdactyl Riders", img: "ripperdactyl.png", page: "ripperdactyl.html" },
+ { id: "Realmshaper", name: "Realmshaper", img: "realmshaper.png", page: "realmshaper.html" }
 ];
 
 const manifestationUnitList = [
@@ -804,8 +805,7 @@ const manifestationUnitList = [
  { id: "Krondspine", name: "Krondspine", img: "krondspine.png", page: "krondspine.html" },
  { id: "Geminids", name: "Geminids", img: "geminids.png", page: "geminids.html" },
  { id: "Umbrall Spellportal", name: "Umbrall Spellportal", img: "umbral-spellportal.png", page: "umbral-spellportal.html" },
- { id: "Prismatic Palisade", name: "Prismatic Palisade", img: "prismatic-palisade.png", page: "prismatic-palisade.html" },
- { id: "Realmshaper", name: "Realmshaper", img: "realmshaper.png", page: "realmshaper.html" }
+ { id: "Prismatic Palisade", name: "Prismatic Palisade", img: "prismatic-palisade.png", page: "prismatic-palisade.html" }
 ];
 
 const unitList = [...normalUnitList, ...manifestationUnitList];
