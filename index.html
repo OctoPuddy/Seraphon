@@ -62,6 +62,11 @@ html, body {
      background-color: #c88;
      color: white;
    }
+   /* Style pour le bouton Manifestations actif */
+   .manifestation-toggle.active {
+     background-color: #c8c;
+     color: white;
+   }
    .dropdown-panel {
      position: absolute;
      top: 100%;
@@ -292,6 +297,15 @@ html, body {
 <label><input data-img="icons/primal-jungles.png" data-key="spell-Primal" name="spell" type="radio"/>Primal Jungles</label>
 </div>
 </div>
+<div style="position: relative;">
+<button onclick="toggleDropdown('manifestationDropdown')">Manifestations</button>
+<div class="dropdown-panel" id="manifestationDropdown">
+<label><input data-group="twilit" data-key="manifestation-twilit" name="manifestation" type="radio"/>Twilit Sorcery</label>
+<label><input data-group="malevolent" data-key="manifestation-malevolent" name="manifestation" type="radio"/>Malevolent Magic</label>
+<label><input data-group="endless" data-key="manifestation-endless" name="manifestation" type="radio"/>Endless Spells</label>
+<label><input data-group="none" data-key="manifestation-none" name="manifestation" type="radio"/>Sans</label>
+</div>
+</div>
 </div>
 <div class="header-right">
 <button class="drag-toggle" id="dragToggleBtn" onclick="toggleDrag()">Déverrouiller</button>
@@ -377,12 +391,13 @@ html, body {
 </div>
 </div>
 <script>
-  let currentTraitTarget = null;
+    let currentTraitTarget = null;
 let sortableInstance = null;
 let compositionMode = false;
 let badgeMode = false;
 let currentBadgeTarget = null;
 let currentSpellLore = null;
+let currentManifestation = null;
 
 window.addEventListener("beforeunload", () => {
  sessionStorage.setItem("scrollPos", window.scrollY);
@@ -398,7 +413,6 @@ function openPopup(target) {
  if (target === 'T1' || target === 'T3') {
    document.getElementById('popup-t1t3').style.display = 'grid';
  } else if (target === 'spell-lore') {
-   // Afficher les spells du lore actuellement sélectionné
    const spellsDiv = document.getElementById('popup-spells');
    spellsDiv.innerHTML = '';
    
@@ -426,7 +440,6 @@ function openPopup(target) {
    }
  }
 }
-
 function selectTrait(number) {
  if (currentTraitTarget) {
    const slot = document.getElementById(`battle-slot-${currentTraitTarget}`);
@@ -474,10 +487,8 @@ function selectMonstruous(number) {
  }
  document.getElementById('popup-overlay').style.display = 'none';
 }
-
 function selectBadge(number) {
   if (currentBadgeTarget) {
-    // Récupérer ou créer le container de badges
     let badgesContainer = currentBadgeTarget.querySelector('.badges-container');
     if (!badgesContainer) {
       badgesContainer = document.createElement('div');
@@ -485,31 +496,25 @@ function selectBadge(number) {
       currentBadgeTarget.appendChild(badgesContainer);
     }
     
-    // Vérifier si ce badge existe déjà
     const existingBadge = badgesContainer.querySelector(`img[src="icons/badge${number}.png"]`);
     if (existingBadge) {
-      // Si le badge existe, le retirer
       existingBadge.remove();
     } else {
-      // Si on a déjà 3 badges, retirer le premier
       const badges = badgesContainer.querySelectorAll('.unit-badge');
       if (badges.length >= 3) {
         badges[0].remove();
       }
       
-      // Ajouter le nouveau badge
       const badge = document.createElement('img');
       badge.className = 'unit-badge';
       badge.src = `icons/badge${number}.png`;
       badgesContainer.appendChild(badge);
     }
     
-    // Nettoyer si le container est vide
     if (badgesContainer.children.length === 0) {
       badgesContainer.remove();
     }
     
-    // Sauvegarder les badges
     saveBadges(currentBadgeTarget);
   }
   document.getElementById('popup-overlay').style.display = 'none';
@@ -549,7 +554,6 @@ function loadBadges(target) {
     }
   }
 }
-
 function toggleDropdown(id) {
  document.querySelectorAll('.dropdown-panel').forEach(drop => {
    drop.style.display = (drop.id === id && drop.style.display !== 'flex') ? 'flex' : 'none';
@@ -565,8 +569,46 @@ function updateTopCard(slotId, imgPath) {
  }
 }
 
+function updateManifestationCards() {
+  const manifestationUnits = getManifestationUnits();
+  
+  manifestationUnits.forEach(unitId => {
+    const card = document.querySelector(`.image-button[data-id="${unitId}"]`);
+    if (card) {
+      card.classList.add('hidden-card');
+      card.classList.add('manifestation-unit');
+    }
+  });
+  
+  if (currentManifestation && currentManifestation !== 'none') {
+    const activeUnits = getManifestationGroup(currentManifestation);
+    activeUnits.forEach(unitId => {
+      const card = document.querySelector(`.image-button[data-id="${unitId}"]`);
+      if (card) {
+        card.classList.remove('hidden-card');
+      }
+    });
+  }
+}
+
+function getManifestationUnits() {
+  return [
+    "Malevolent", "Purple sun", "Soulsnare", "Gravetide", "Krondspine", 
+    "Geminids", "Umbrall Spellportal", "Prismatic Palisade", "Realmshaper"
+  ];
+}
+
+function getManifestationGroup(group) {
+  const groups = {
+    'twilit': ["Geminids", "Prismatic Palisade", "Umbrall Spellportal"],
+    'malevolent': ["Malevolent", "Purple sun", "Soulsnare"],
+    'endless': ["Gravetide", "Krondspine", "Realmshaper"]
+  };
+  return groups[group] || [];
+}
+
 function toggleDrag() {
- if (compositionMode || badgeMode) return; // Ne pas activer le drag en mode composition ou badge
+ if (compositionMode || badgeMode) return;
  
  const container = document.getElementById('cardContainer');
  const button = document.getElementById('dragToggleBtn');
@@ -606,12 +648,10 @@ function toggleCompositionMode() {
  compositionMode = !compositionMode;
  const button = document.getElementById('compositionToggle');
  
- // Si mode composition activé, désactiver Sortable et Badge mode
  if (compositionMode) {
    button.classList.add("active");
    document.body.classList.add("composition-mode");
    
-   // Désactiver le mode badge s'il est actif
    if (badgeMode) {
      toggleBadgeMode();
    }
@@ -623,22 +663,37 @@ function toggleCompositionMode() {
      document.getElementById('dragToggleBtn').classList.remove("active");
    }
    
-   // Afficher toutes les cartes et appliquer inactive-card à celles masquées
    document.querySelectorAll('.image-button').forEach(card => {
      const id = card.dataset.id;
-     const visible = localStorage.getItem("visible-" + id);
-     card.classList.remove("hidden-card");
-     card.classList.toggle("inactive-card", visible === "0");
+     const isManifestation = card.classList.contains('manifestation-unit');
+     
+     if (isManifestation) {
+       card.classList.add("hidden-card");
+     } else {
+       const visible = localStorage.getItem("visible-" + id);
+       card.classList.remove("hidden-card");
+       card.classList.toggle("inactive-card", visible === "0");
+     }
    });
  } else {
    button.classList.remove("active");
    document.body.classList.remove("composition-mode");
-   // Masquer les cartes désactivées
+   
    document.querySelectorAll('.image-button').forEach(card => {
      const id = card.dataset.id;
-     const visible = localStorage.getItem("visible-" + id);
+     const isManifestation = card.classList.contains('manifestation-unit');
+     
      card.classList.remove("inactive-card");
-     if (visible === "0") card.classList.add("hidden-card");
+     
+     if (isManifestation) {
+       const manifestationUnits = getManifestationUnits();
+       const isInCurrentGroup = currentManifestation && currentManifestation !== 'none' && 
+                               getManifestationGroup(currentManifestation).includes(id);
+       card.classList.toggle("hidden-card", !isInCurrentGroup);
+     } else {
+       const visible = localStorage.getItem("visible-" + id);
+       if (visible === "0") card.classList.add("hidden-card");
+     }
    });
  }
 }
@@ -649,11 +704,9 @@ function toggleBadgeMode() {
  
  if (badgeMode) {
    button.classList.add("active");
-   // Désactiver le mode composition s'il est actif
    if (compositionMode) {
      toggleCompositionMode();
    }
-   // Désactiver le drag s'il est actif
    if (sortableInstance) {
      sortableInstance.destroy();
      sortableInstance = null;
@@ -683,7 +736,6 @@ function resetAllData() {
  for (let i = 0; i < localStorage.length; i++) {
    const key = localStorage.key(i);
 
-   // Ne pas toucher aux sélections de battle, artefact, trait, spell-lore et monstruous
    const isProtected =
      key === "battle-selection" ||
      key === "artefact-selection" ||
@@ -691,6 +743,7 @@ function resetAllData() {
      key === "spell-Celestial" ||
      key === "spell-Primal" ||
      key === "monstruous-selection" ||
+     key.startsWith("manifestation-") ||
      key === "battle-eternalstar" ||
      key === "battle-shadowstrike" ||
      key === "battle-sunclaw" ||
@@ -702,13 +755,13 @@ function resetAllData() {
      key === "trait-beingofthestars" ||
      key === "trait-reptiliancunning";
 
-if (
-  (key.startsWith("trait-T1") ||
-   key.startsWith("trait-T3") ||
-   key.startsWith("buttonsState-") ||
-   key.startsWith("notesText-")) &&
-   !isProtected
-) {
+   if (
+     (key.startsWith("trait-T1") ||
+      key.startsWith("trait-T3") ||
+      key.startsWith("buttonsState-") ||
+      key.startsWith("notesText-")) &&
+      !isProtected
+   ) {
      keysToRemove.push(key);
    }
  }
@@ -717,37 +770,33 @@ if (
  location.reload();
 }
 
-// Définition de la liste des unités
-const unitList = [
+const normalUnitList = [
  { id: "Slann", name: "Slann Starmaster", img: "slann.png", page: "slann.html" },
  { id: "Oldblood carno ghyran", name: "Oldblood on Carnosaur (Ghyran)", img: "oldblood-carno-ghyran.png", page: "oldblood-carno-ghyran.html" },
  { id: "Oldblood carno", name: "Oldblood on Carnosaur", img: "oldblood-carno.png", page: "oldblood-carno.html" },
  { id: "Troglodon", name: "Skink Oracle on Troglodon", img: "troglodon.png", page: "troglodon.html" },
  { id: "Starseer", name: "Skink Starseer", img: "starseer.png", page: "starseer.html" },
  { id: "Starpriest", name: "Skink Starpriest", img: "starpriest.png", page: "starpriest.html" },
-
  { id: "Aggradon", name: "Aggradon Lancers", img: "aggradon-lancers.png", page: "aggradon-lancers.html" },
  { id: "Chargers", name: "Raptadon Chargers", img: "raptadon-chargers.png", page: "raptadon-chargers.html" },
  { id: "Hunters", name: "Raptadon Hunters", img: "raptadon-hunters.png", page: "raptadon-hunters.html" },
-
  { id: "Saurus", name: "Saurus Warriors", img: "saurus-warriors.png", page: "saurus-warriors.html" },
  { id: "Saurus Guard", name: "Saurus Guard", img: "saurus-guard.png", page: "saurus-guard.html" },
  { id: "Kroxigor", name: "Kroxigor", img: "kroxigor.png", page: "kroxigor.html" },
  { id: "Kroxigor Warspawned", name: "Kroxigor Warspawned", img: "kroxigor-warspawned.png", page: "kroxigor-warspawned.html" },
-
  { id: "Skinks", name: "Skinks", img: "skinks.png", page: "skinks.html" },
  { id: "Huanchi Bolas", name: "Hunters of Huanchi (Bolas)", img: "huanchi-bolas.png", page: "huanchi-bolas.html" },
  { id: "Huanchi Dartpipe", name: "Hunters of Huanchi (Dartpipe)", img: "huanchi-dartpipe.png", page: "huanchi-dartpipe.html" },
-
  { id: "bastiladon-solar", name: "Bastiladon with Solar Engine", img: "bastiladon-solar.png", page: "bastiladon-solar.html" },
  { id: "bastiladon-sotek", name: "Bastiladon with Ark of Sotek", img: "bastiladon-sotek.png", page: "bastiladon-sotek.html" },
  { id: "stegadon", name: "Stegadon", img: "stegadon.png", page: "stegadon.html" },
  { id: "stegadon-chief", name: "Stegadon Chief", img: "stegadon-chief.png", page: "stegadon-chief.html" },
  { id: "engineofgods", name: "Engine of the Gods", img: "engineofgods.png", page: "engineofgods.html" },
-
  { id: "terradon", name: "Terradon Riders", img: "terradon.png", page: "terradon.html" },
- { id: "ripperdactyl", name: "Ripperdactyl Riders", img: "ripperdactyl.png", page: "ripperdactyl.html" },
+ { id: "ripperdactyl", name: "Ripperdactyl Riders", img: "ripperdactyl.png", page: "ripperdactyl.html" }
+];
 
+const manifestationUnitList = [
  { id: "Malevolent", name: "Malevolent Maelstrom", img: "malevolent.png", page: "malevolent.html" },
  { id: "Purple sun", name: "Purple Sun", img: "purple-sun.png", page: "purple-sun.html" },
  { id: "Soulsnare", name: "Soulsnare Shackles", img: "soulsnare.png", page: "soulsnare.html" },
@@ -759,21 +808,20 @@ const unitList = [
  { id: "Realmshaper", name: "Realmshaper", img: "realmshaper.png", page: "realmshaper.html" }
 ];
 
+const unitList = [...normalUnitList, ...manifestationUnitList];
+
 document.addEventListener('DOMContentLoaded', () => {
- // Initialisation du bouton Composition
  const compBtn = document.getElementById("compositionToggle");
  if (compBtn) {
    compBtn.addEventListener("click", toggleCompositionMode);
  }
  
- // Initialisation du bouton Badge
  const badgeBtn = document.getElementById("badgeToggle");
  if (badgeBtn) {
    badgeBtn.addEventListener("click", toggleBadgeMode);
  }
 
- // Restauration des sélections pour battle seulement (artefact et trait ont maintenant leur propre logique)
-const battleSelected = localStorage.getItem("battle-selection");
+ const battleSelected = localStorage.getItem("battle-selection");
  if (battleSelected) {
    const slot = document.getElementById("slot-battle");
    if (slot) {
@@ -781,7 +829,6 @@ const battleSelected = localStorage.getItem("battle-selection");
    }
  }
  
- // Restauration de la sélection artefact
  const artefactSelection = localStorage.getItem('artefact-selection');
  if (artefactSelection) {
    const slot = document.getElementById('slot-artefact');
@@ -789,7 +836,6 @@ const battleSelected = localStorage.getItem("battle-selection");
    mainImg.src = `icons/artefact${artefactSelection}.png`;
  }
  
- // Restauration de la sélection trait
  const traitSelection = localStorage.getItem('trait-selection');
  if (traitSelection) {
    const slot = document.getElementById('slot-trait');
@@ -797,53 +843,53 @@ const battleSelected = localStorage.getItem("battle-selection");
    mainImg.src = `icons/${traitSelection}.png`;
  }
  
- // Restauration de la sélection monstruous
  const monstruousSelection = localStorage.getItem('monstruous-selection');
  if (monstruousSelection) {
    const slot = document.getElementById('slot-monstruous');
    const mainImg = slot.querySelector('img:not(.unit-badge)');
    mainImg.src = `icons/monstruous${monstruousSelection}.png`;
  }
- // Restaurer artefact par défaut si aucune sélection
-if (!artefactSelection) {
-  const slot = document.getElementById('slot-artefact');
-  const mainImg = slot.querySelector('img:not(.unit-badge)');
-  mainImg.src = 'icons/artefact.png';
-}
 
-// Restaurer trait par défaut si aucune sélection  
-if (!traitSelection) {
-  const slot = document.getElementById('slot-trait');
-  const mainImg = slot.querySelector('img:not(.unit-badge)');
-  mainImg.src = 'icons/trait.png';
-}
- // Création du conteneur de cartes
+ if (!artefactSelection) {
+   const slot = document.getElementById('slot-artefact');
+   const mainImg = slot.querySelector('img:not(.unit-badge)');
+   mainImg.src = 'icons/artefact.png';
+ }
+
+ if (!traitSelection) {
+   const slot = document.getElementById('slot-trait');
+   const mainImg = slot.querySelector('img:not(.unit-badge)');
+   mainImg.src = 'icons/trait.png';
+ }
+
  const container = document.getElementById("cardContainer");
  
- // Créer les cartes unités
- unitList.forEach(unit => {
-   // Crée la vignette
+ function createUnitCard(unit, container, isManifestation) {
    const a = document.createElement("a");
    a.href = unit.page;
    a.className = "image-button";
    a.dataset.id = unit.id;
    
-   // Créer l'élément pour le nom de l'unité
+   if (isManifestation) {
+     a.classList.add('manifestation-unit');
+     a.classList.add('hidden-card');
+   }
+   
    const nameDiv = document.createElement("div");
    nameDiv.className = "unit-name";
    nameDiv.textContent = unit.name;
    
    a.innerHTML = `<img src="boutons/${unit.img}" alt="${unit.name}">`;
-     a.appendChild(nameDiv);
+   a.appendChild(nameDiv);
    
-   // Vérifier et initialiser la visibilité
-   const visible = localStorage.getItem("visible-" + unit.id);
-   if (visible === null) localStorage.setItem("visible-" + unit.id, "0");
-   if (visible === "0" || visible === null) a.classList.add("hidden-card");
+   if (!isManifestation) {
+     const visible = localStorage.getItem("visible-" + unit.id);
+     if (visible === null) localStorage.setItem("visible-" + unit.id, "0");
+     if (visible === "0" || visible === null) a.classList.add("hidden-card");
+   }
    
-   // Ajouter l'événement de clic pour le mode composition et badge
    a.addEventListener("click", e => {
-     if (compositionMode) {
+     if (compositionMode && !isManifestation) {
        e.preventDefault();
        const isInactive = a.classList.toggle("inactive-card");
        localStorage.setItem("visible-" + unit.id, isInactive ? "0" : "1");
@@ -856,34 +902,42 @@ if (!traitSelection) {
    
    container.appendChild(a);
    
-   // Créer également l'entrée dans le filterDropdown pour la compatibilité
-   const label = document.createElement("label");
-   const checkbox = document.createElement("input");
-   checkbox.type = "checkbox";
-   checkbox.dataset.id = unit.id;
-   checkbox.checked = visible === "1";
-   label.appendChild(checkbox);
-   label.appendChild(document.createTextNode(" " + unit.name));
-   document.getElementById("filterDropdown").appendChild(label);
-   
-   // Gestionnaire pour les checkboxes du dropdown (maintenu pour compatibilité)
-   checkbox.addEventListener("change", () => {
-     const card = document.querySelector(`.image-button[data-id="${unit.id}"]`);
-     if (!card) return;
+   if (!isManifestation) {
+     const label = document.createElement("label");
+     const checkbox = document.createElement("input");
+     checkbox.type = "checkbox";
+     checkbox.dataset.id = unit.id;
+     const visible = localStorage.getItem("visible-" + unit.id);
+     checkbox.checked = visible === "1";
+     label.appendChild(checkbox);
+     label.appendChild(document.createTextNode(" " + unit.name));
+     document.getElementById("filterDropdown").appendChild(label);
      
-     const isChecked = checkbox.checked;
-     localStorage.setItem("visible-" + unit.id, isChecked ? "1" : "0");
-     
-     if (!compositionMode) {
-       card.style.display = isChecked ? "block" : "none";
-       card.classList.toggle("hidden-card", !isChecked);
-     } else {
-       card.classList.toggle("inactive-card", !isChecked);
-     }
-   });
+     checkbox.addEventListener("change", () => {
+       const card = document.querySelector(`.image-button[data-id="${unit.id}"]`);
+       if (!card) return;
+       
+       const isChecked = checkbox.checked;
+       localStorage.setItem("visible-" + unit.id, isChecked ? "1" : "0");
+       
+       if (!compositionMode) {
+         card.style.display = isChecked ? "block" : "none";
+         card.classList.toggle("hidden-card", !isChecked);
+       } else {
+         card.classList.toggle("inactive-card", !isChecked);
+       }
+     });
+   }
+ }
+ 
+ normalUnitList.forEach(unit => {
+   createUnitCard(unit, container, false);
  });
  
- // Restaurer les badges sauvegardés
+ manifestationUnitList.forEach(unit => {
+   createUnitCard(unit, container, true);
+ });
+ 
  unitList.forEach(unit => {
    const card = document.querySelector(`.image-button[data-id="${unit.id}"]`);
    if (card) {
@@ -891,11 +945,9 @@ if (!traitSelection) {
    }
  });
  
- // Repositionne le scroll
  const savedPos = sessionStorage.getItem("scrollPos");
  if (savedPos) window.scrollTo(0, parseInt(savedPos));
  
- // Restaure les traits de bataille
  ['T1', 'T3'].forEach(id => {
    const saved = localStorage.getItem(`trait-${id}`);
    if (saved) {
@@ -904,7 +956,6 @@ if (!traitSelection) {
    }
  });
  
- // Configuration des sélections de sorts
  document.querySelectorAll('#spellDropdown input[type="radio"]').forEach(input => {
    const key = input.dataset.key;
    const img = input.dataset.img;
@@ -925,7 +976,25 @@ if (!traitSelection) {
    });
  });
  
- // Si aucun spell lore sélectionné, sélectionner le premier par défaut
+ document.querySelectorAll('#manifestationDropdown input[type="radio"]').forEach(input => {
+   const key = input.dataset.key;
+   const group = input.dataset.group;
+   
+   if (localStorage.getItem(key) === "1") {
+     input.checked = true;
+     currentManifestation = group;
+   }
+   
+   input.addEventListener("change", () => {
+     document.querySelectorAll('#manifestationDropdown input[type="radio"]').forEach(i => {
+       localStorage.setItem(i.dataset.key, "0");
+     });
+     localStorage.setItem(key, "1");
+     currentManifestation = group;
+     updateManifestationCards();
+   });
+ });
+ 
  const spellInputs = document.querySelectorAll('#spellDropdown input[type="radio"]');
  const anySpellChecked = Array.from(spellInputs).some(input => input.checked);
  if (!anySpellChecked && spellInputs.length > 0) {
@@ -933,24 +1002,32 @@ if (!traitSelection) {
    spellInputs[0].dispatchEvent(new Event('change'));
  }
  
+ const manifestationInputs = document.querySelectorAll('#manifestationDropdown input[type="radio"]');
+ const anyManifestationChecked = Array.from(manifestationInputs).some(input => input.checked);
+ if (!anyManifestationChecked) {
+   const noneOption = document.querySelector('#manifestationDropdown input[data-group="none"]');
+   if (noneOption) {
+     noneOption.checked = true;
+     currentManifestation = 'none';
+     localStorage.setItem(noneOption.dataset.key, "1");
+   }
+ }
+ 
+ updateManifestationCards();
  loadCardOrder();
 });
 
 document.addEventListener('click', (e) => {
- // Fermer les dropdowns en cliquant ailleurs
  if (!e.target.closest('.dropdown-panel') && !e.target.matches('button')) {
    document.querySelectorAll('.dropdown-panel').forEach(drop => drop.style.display = 'none');
  }
  
- // Fermer le popup en cliquant en dehors
  if (e.target.id === 'popup-overlay') {
-   // En mode badge, retirer tous les badges de l'unité sélectionnée
    if (currentBadgeTarget) {
      const badgesContainer = currentBadgeTarget.querySelector('.badges-container');
      if (badgesContainer) {
        badgesContainer.remove();
      }
-     // Supprimer aussi la sauvegarde des badges
      localStorage.removeItem(`badges-${currentBadgeTarget.dataset.id}`);
      currentBadgeTarget = null;
    }
@@ -965,6 +1042,4 @@ if (sessionStorage.getItem('returnToRest')) {
    sessionStorage.removeItem('returnToRest');
  }
 }
-</script>
-</body>
-</html>
+</script>  
