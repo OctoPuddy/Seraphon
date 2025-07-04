@@ -108,11 +108,11 @@
     }
 
     .vp-input {
-      font-size: 24px;
-      padding: 5px 10px;
+      font-size: 36px;
+      padding: 8px 15px;
       border: 2px solid #ccc;
       border-radius: 4px;
-      width: 80px;
+      width: 120px;
       text-align: center;
       outline: none;
     }
@@ -573,6 +573,13 @@
 
     // Sauvegarder la valeur VP quand elle change
     document.getElementById("vpInput").addEventListener("input", saveVPValue);
+    
+    // Fermer le pavé numérique quand on appuie sur Entrée
+    document.getElementById("vpInput").addEventListener("keydown", function(event) {
+      if (event.key === "Enter") {
+        this.blur(); // Fait perdre le focus, ce qui ferme le pavé numérique
+      }
+    });
   </script>
 </body>
 </html>
