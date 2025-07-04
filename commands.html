@@ -524,10 +524,24 @@
       // Reset du champ VP
       document.getElementById("vpInput").value = "";
       
+      // Reset des checkboxes vertes (remettre à l'état 0)
+      const greenCheckboxes = document.querySelectorAll('.green-check');
+      greenCheckboxes.forEach(checkbox => {
+        checkbox.classList.remove('state-0', 'state-1', 'state-2', 'state-3');
+        checkbox.classList.add('state-0');
+        checkbox.textContent = '✓';
+      });
+      
       try {
         const savedData = JSON.parse(localStorage.getItem("tacticData") || "{}");
         delete savedData.canvasDrawing;
         delete savedData.vpValue;
+        // Reset des états des checkboxes vertes
+        if (savedData.tactics) {
+          for (let i = 1; i <= 6; i++) {
+            delete savedData.tactics[`tactic${i}_check_state`];
+          }
+        }
         localStorage.setItem("tacticData", JSON.stringify(savedData));
       } catch (e) {
         console.warn("Échec de la suppression des données de dessin", e);
