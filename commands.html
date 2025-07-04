@@ -75,7 +75,7 @@
     .reset-btn {
       position: fixed;
       bottom: 10px;
-      right: 10px;
+      left: 10px;
       z-index: 50;
       padding: 0.5em 1em;
       font-size: 24px;
@@ -85,6 +85,40 @@
       cursor: pointer;
       border-radius: 6px;
       box-shadow: 0 0 4px rgba(0, 0, 0, 0.4);
+    }
+
+    .vp-container {
+      position: fixed;
+      bottom: 10px;
+      right: 10px;
+      z-index: 50;
+      background-color: white;
+      padding: 10px 15px;
+      border-radius: 6px;
+      box-shadow: 0 0 4px rgba(0, 0, 0, 0.4);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .vp-label {
+      font-size: 24px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .vp-input {
+      font-size: 24px;
+      padding: 5px 10px;
+      border: 2px solid #ccc;
+      border-radius: 4px;
+      width: 80px;
+      text-align: center;
+      outline: none;
+    }
+
+    .vp-input:focus {
+      border-color: #007bff;
     }
 
     .checkbox-container {
@@ -256,8 +290,14 @@
     <img src="icons/draw.png" alt="Dessin" />
   </button>
 
-  <!-- Bouton reset -->
+  <!-- Bouton reset (déplacé en bas à gauche) -->
   <button class="reset-btn" onclick="resetCanvas()">Reset</button>
+
+  <!-- Champ VP (nouveau, en bas à droite) -->
+  <div class="vp-container">
+    <span class="vp-label">VP :</span>
+    <input type="number" class="vp-input" id="vpInput" placeholder="0" />
+  </div>
 
   <script>
     const canvas = document.getElementById("drawCanvas");
@@ -278,6 +318,7 @@
     window.addEventListener("load", () => {
       resizeCanvas();
       loadTacticStates();
+      loadVPValue();
     });
 
     function getPos(e) {
@@ -480,14 +521,44 @@
 
     function resetCanvas() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      // Reset du champ VP
+      document.getElementById("vpInput").value = "";
+      
       try {
         const savedData = JSON.parse(localStorage.getItem("tacticData") || "{}");
         delete savedData.canvasDrawing;
+        delete savedData.vpValue;
         localStorage.setItem("tacticData", JSON.stringify(savedData));
       } catch (e) {
         console.warn("Échec de la suppression des données de dessin", e);
       }
     }
+
+    // Fonctions pour gérer la valeur VP
+    function saveVPValue() {
+      try {
+        const vpValue = document.getElementById("vpInput").value;
+        const savedData = JSON.parse(localStorage.getItem("tacticData") || "{}");
+        savedData.vpValue = vpValue;
+        localStorage.setItem("tacticData", JSON.stringify(savedData));
+      } catch (e) {
+        console.warn("Échec de la sauvegarde de la valeur VP", e);
+      }
+    }
+
+    function loadVPValue() {
+      try {
+        const savedData = JSON.parse(localStorage.getItem("tacticData") || "{}");
+        if (savedData.vpValue !== undefined) {
+          document.getElementById("vpInput").value = savedData.vpValue;
+        }
+      } catch (e) {
+        console.warn("Échec du chargement de la valeur VP", e);
+      }
+    }
+
+    // Sauvegarder la valeur VP quand elle change
+    document.getElementById("vpInput").addEventListener("input", saveVPValue);
   </script>
 </body>
 </html>
